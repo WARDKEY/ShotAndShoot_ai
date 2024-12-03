@@ -20,14 +20,22 @@ async def predict(file: UploadFile):
 
     # YOLO 모델을 사용하여 이미지 예측
     results = model(image)
-    #results = model("C:/Users/dndsm/Desktop/plastic_bottle/plastic2.jpg")
-
-    predictions = results[0].names[0]  #클래스 이름
-    plots = results[0].plot() #예측 사진
-
+    predictions = []
+    
+    for result in results:
+        plots = result.plot() # 예측된 이미지 플롯
+        
+        for cls, conf in zip(result.boxes.cls, result.boxes.conf):
+            predictions.append({
+                "class": model.names[int(cls)], 
+                "reliability": round(float(conf), 2),
+            })
+            
+    #openCV 형식으로 변환
     _, buffer = cv2.imencode('.jpg', plots)
     result_base64 = base64.b64encode(buffer).decode('utf-8')
 
-    return {"class": predictions, "image": result_base64}
+    return {"predictions": predictions, "img": result_base64}
+
 
 #실행 uvicorn trained_model:app --reload
