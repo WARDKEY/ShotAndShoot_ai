@@ -4,19 +4,19 @@ from PIL import Image
 from ultralytics import YOLO
 import cv2
 import base64
-import os
+from pydantic import BaseModel
 
 app = FastAPI()
 
-print(os.getcwd())
 model = YOLO('model/yolov8_trained.pt')
 
-@app.post("/predict/")
-async def predict(file: UploadFile):
-    image_bytes = await file.read()
+class ImageRequest(BaseModel):
+    image: str
 
-    # 바이트 데이터를 PIL 이미지로 변환
-    image = Image.open(BytesIO(image_bytes))
+@app.post("/predict/")
+async def predict(request: ImageRequest):
+    image_data = base64.b64decode(request.image)
+    image = Image.open(BytesIO(image_data))
 
     # YOLO 모델을 사용하여 이미지 예측
     results = model(image)
@@ -35,7 +35,7 @@ async def predict(file: UploadFile):
     _, buffer = cv2.imencode('.jpg', plots)
     result_base64 = base64.b64encode(buffer).decode('utf-8')
 
-    return {"predictions": predictions, "img": result_base64}
+    return {"predictions": predictions, "img": "result_base64.jpg"}
 
 
 #실행 uvicorn trained_model:app --reload
