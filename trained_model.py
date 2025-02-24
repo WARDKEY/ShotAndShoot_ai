@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-model = YOLO('model/yolov8_trained.pt')
+model = YOLO('model/yolov8_waste_v1.pt')
 
 class ImageRequest(BaseModel):
     image: str
