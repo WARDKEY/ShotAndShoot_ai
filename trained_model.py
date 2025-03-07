@@ -19,7 +19,7 @@ async def predict(request: ImageRequest):
     image = Image.open(BytesIO(image_data))
 
     # YOLO 모델을 사용하여 이미지 예측
-    results = model(image)
+    results = model(image, conf=0.5) # 정확도 0.5 이상 필터링
     predictions = []
     
     for result in results:
